@@ -77,9 +77,9 @@ ReceiverVolume.prototype.getMute = function(callback) {
         }.bind(this));
     } else if (this.controlMute) {
         this.getStatus(function(status) {
-            var powerState = status ? (status.Mute[0].value[0] === "on" ? 0 : 1) : 0;
-            this.log("Receiver %s Volume state is %s", this.zoneName, powerState);
-            callback(null, powerState);
+            var muteState = status ? (status.Mute[0].value[0] === "on" ? 0 : 1) : 0;
+            this.log("Receiver %s Volume state is %s", this.zoneName, muteState);
+            callback(null, muteState);
         }.bind(this));
     } else {
         this.log("Receiver %s Volume power state is %s", this.zoneName, this.fakePowerState);
@@ -87,17 +87,17 @@ ReceiverVolume.prototype.getMute = function(callback) {
     }
 }
 
-ReceiverVolume.prototype.setMute = function(powerOn, callback) {
+ReceiverVolume.prototype.setMute = function(mute, callback) {
     if (this.controlPower) {
-        var command = powerOn ? 'PowerOn' : 'PowerStandby';
+        var command = mute ? 'PowerOn' : 'PowerStandby';
         this.log("Set receiver %s volume power state to %s", this.zoneName, command);
         this.setControl('Power', command, callback);
     } else if (this.controlMute) {
-        var command = powerOn ? 'MuteOff' : 'MuteOn';
+        var command = mute ? 'MuteOff' : 'MuteOn';
         this.log("Set receiver %s volume state to %s", this.zoneName, command);
         this.setControl('Mute', command, callback);
     } else {
-        this.fakePowerState = powerOn ? 1 : 0;
+        this.fakePowerState = mute ? 1 : 0;
         //this.fakePowerState = 1;
         this.log("Set receiver %s volume power state to %s", this.zoneName, this.fakePowerState);
         callback(null);
