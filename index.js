@@ -16,10 +16,10 @@ function ReceiverVolume(log, config) {
     this.maxVolume = config['maxVolume'] || 70;
     this.host = config['host'];
     this.zone = (config['zone'] || 1) | 0; // default to 1, and make sure its an integer
-    this.controlPower = !!config['controlPower']; // default to false, and make sure its a bool
     this.useLightbulb = !!config['useLightbulb']; // default to false, and make sure its a bool
     this.useFan = !!config['useFan']; // default to false, and make sure its a bool
-    this.controlMute = !!config['controlMute'] && this.controlPower === false;
+    this.controlMute = config['controlMute'] || (this.useLightbulb === false && this.useFan === false); // default to true only if useLightbulb or useFan are both false
+    this.controlPower = !!config['controlPower'] || false; // default to false, and make sure its a bool
     this.mapMaxVolumeTo100 = !!config['mapMaxVolumeTo100'];
     
     //cap maxVolume.  Denon/Marantz percentage maxes at 98 in receiver settings
