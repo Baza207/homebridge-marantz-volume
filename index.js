@@ -68,7 +68,7 @@ ReceiverVolume.prototype.setControl = function (control, command, callback) {
     }.bind(this));
 }
 
-ReceiverVolume.prototype.getPowerOn = function(callback) {
+ReceiverVolume.prototype.getMute = function(callback) {
     if (this.controlPower) {
         this.getStatus(function(status) {
             var powerState = status ? (status.Power[0].value[0] === "ON" ? 1 : 0) : 0;
@@ -87,7 +87,7 @@ ReceiverVolume.prototype.getPowerOn = function(callback) {
     }
 }
 
-ReceiverVolume.prototype.setPowerOn = function(powerOn, callback) {
+ReceiverVolume.prototype.setMute = function(powerOn, callback) {
     if (this.controlPower) {
         var command = powerOn ? 'PowerOn' : 'PowerStandby';
         this.log("Set receiver %s volume power state to %s", this.zoneName, command);
@@ -104,7 +104,7 @@ ReceiverVolume.prototype.setPowerOn = function(powerOn, callback) {
     }
 }
 
-ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
+ReceiverVolume.prototype.setVolume = function(newLevel, callback) {
 
     if(this.mapMaxVolumeTo100){
         var volumeMultiplier = this.maxVolume/100;
@@ -128,7 +128,7 @@ ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
     this.setControl('Volume', relativeVolume, callback);
 }
 
-ReceiverVolume.prototype.getBrightness = function(callback) {
+ReceiverVolume.prototype.getVolume = function(callback) {
     this.getStatus(function(status) {
         
         if(status){
@@ -158,19 +158,19 @@ ReceiverVolume.prototype.getServices = function() {
     }
     lightbulbService
         .getCharacteristic(Characteristic.On)
-        .on('get', this.getPowerOn.bind(this))
-        .on('set', this.setPowerOn.bind(this));
+        .on('get', this.getMute.bind(this))
+        .on('set', this.setMute.bind(this));
     if (this.useFan) {
         lightbulbService
             .addCharacteristic(new Characteristic.RotationSpeed())
-            .on('get', this.getBrightness.bind(this))
-            .on('set', this.setBrightness.bind(this));
+            .on('get', this.getVolume.bind(this))
+            .on('set', this.setVolume.bind(this));
     }
     else {
         lightbulbService
             .addCharacteristic(new Characteristic.Brightness())
-            .on('get', this.getBrightness.bind(this))
-            .on('set', this.setBrightness.bind(this));
+            .on('get', this.getVolume.bind(this))
+            .on('set', this.setVolume.bind(this));
     }
     return [lightbulbService];
 }
