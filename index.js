@@ -17,6 +17,7 @@ function ReceiverVolume(log, config) {
     this.host = config['host'];
     this.zone = (config['zone'] || 1) | 0; // default to 1, and make sure its an integer
     this.controlPower = !!config['controlPower']; // default to false, and make sure its a bool
+    this.useLightbulb = !!config['useLightbulb']; // default to false, and make sure its a bool
     this.useFan = !!config['useFan']; // default to false, and make sure its a bool
     this.controlMute = !!config['controlMute'] && this.controlPower === false;
     this.mapMaxVolumeTo100 = !!config['mapMaxVolumeTo100'];
@@ -151,26 +152,46 @@ ReceiverVolume.prototype.getVolume = function(callback) {
 
 ReceiverVolume.prototype.getServices = function() {
     if (this.useFan) {
-        var lightbulbService = new Service.Fan(this.name);
+        var speakerService = new Service.Fan(this.name);
+    }
+    else if (this.useLightbulb) {
+        var speakerService = new Service.Lightbulb(this.name);
     }
     else {
-        var lightbulbService = new Service.Lightbulb(this.name);
+        var speakerService = new Service.Speaker(this.name);
     }
-    lightbulbService
-        .getCharacteristic(Characteristic.On)
-        .on('get', this.getMute.bind(this))
-        .on('set', this.setMute.bind(this));
+
+    if (this.useFan || this.useLightbulb) {
+        speakerService
+            .getCharacteristic(Characteristic.On)
+            .on('get', this.getMute.bind(this))
+            .on('set', this.setMute.bind(this));
+    }
+    else {
+        speakerService
+            .getCharacteristic(Characteristic.Mute)
+            .on('get', this.getMute.bind(this))
+            .on('set', this.setMute.bind(this));
+    }
+
     if (this.useFan) {
-        lightbulbService
+        speakerService
             .addCharacteristic(new Characteristic.RotationSpeed())
             .on('get', this.getVolume.bind(this))
             .on('set', this.setVolume.bind(this));
     }
-    else {
-        lightbulbService
+    else if (this.useLightbulb) {
+        speakerService
             .addCharacteristic(new Characteristic.Brightness())
             .on('get', this.getVolume.bind(this))
             .on('set', this.setVolume.bind(this));
     }
-    return [lightbulbService];
+    else {
+        speakerService
+            .addCharacteristic(new Characteristic.Volume)
+            .on('get', this.getVolume.bind(this))
+            .on('set', this.setVolume.bind(this));
+    }
+
+    return [speakerService];
 }
